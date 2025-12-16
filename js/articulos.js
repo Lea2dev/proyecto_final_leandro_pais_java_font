@@ -1,5 +1,6 @@
 // URL base de la API
 const API_URL = "http://localhost:8080/api/articulos";
+const API_URL_CAT = "http://localhost:8080/api/categorias";
 
 // Cuando se carga la página, mostramos el listado
 document.addEventListener("DOMContentLoaded", listarArticulos);
@@ -29,6 +30,7 @@ function listarArticulos() {
                 fila.innerHTML = `
                     <td>${articulo.id}</td>
                     <td>${articulo.nombre}</td>
+                    <td>${articulo.categoria.descripcion}</td>
                     <td>${articulo.precio.toFixed(2)}</td>
                     <td>
                         <button class="btn btn-warning btn-sm" onclick="editarArticulo(${articulo.id})">Editar</button>
@@ -46,29 +48,33 @@ function guardarArticulo(event) {
     event.preventDefault(); // Evitamos el comportamiento por defecto del formulario
 
     // Obtenemos los valores de los campos del formulario
-    const id = document.getElementById("idArticulo").value;
-    const nombre = document.getElementById("nombre").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
+    const idForm = document.getElementById("idArticulo").value;
+    const nombreForm = document.getElementById("nombre").value.trim();
+    const categoriaForm = document.getElementById("categorias").value;
+    const precioForm = parseFloat(document.getElementById("precio").value);
 
     // Validación de campos
-    if (!nombre || isNaN(precio) || precio < 0) {
+    if (!nombreForm || isNaN(precioForm) || precioForm < 0) {
         alert("Por favor complete correctamente los campos.");
         return;
     }
 
-    // Creamos un objeto artículo con los datos del formulario
-    const articulo = { nombre, precio };
+    // Creamos un objeto artículo con los datos del formulario sin JSON.stringgify para construir con id de categoria relacionada
+    const articulo = '{"nombre": "'+nombreForm+'",  "precio": '+precioForm+',  "categoria":  { "id": '+categoriaForm+'}  }';
+
     // Determinamos si es una edición (PUT) o creación (POST)
-    const url = id ? `${API_URL}/${id}` : API_URL;
-    const metodo = id ? "PUT" : "POST";
+    const url = idForm ? `${API_URL}/${idForm}` : API_URL;
+    const metodo = idForm ? "PUT" : "POST";
 
     // Enviamos el artículo al backend usando fetch
     fetch(url, {
         method: metodo,
         headers: { "Content-Type": "application/json" }, // Indicamos que el cuerpo es JSON
-        body: JSON.stringify(articulo) // Convertimos el objeto a JSON
+        //body: JSON.stringify(articulo) // Convertimos el objeto a JSON
+        body: articulo
     })
     .then(response => {
+//console.log(articulo); // chequeo objeto
         if (!response.ok) throw new Error("Error al guardar"); // Verificamos respuesta exitosa
         return response.json();
     })
@@ -82,25 +88,29 @@ function guardarArticulo(event) {
 }
 
 // === Cargar artículo en el formulario para edición ===
-function editarArticulo(id) {
+function editarArticulo(idForm) {
     // Llamada GET para obtener los datos del artículo por su ID
-    fetch(`${API_URL}/${id}`)
+    fetch(`${API_URL}/${idForm}`)
         .then(response => response.json()) // Convertimos la respuesta a JSON
         .then(articulo => {
             // Cargamos los datos del artículo en el formulario
             document.getElementById("idArticulo").value = articulo.id;
             document.getElementById("nombre").value = articulo.nombre;
+            //document.getElementById("categorias").value = articulo.categoria.descripcion; /// modificado por usar <option>
+            const selectElement = document.getElementById('categorias');
+            selectElement.value = articulo.categoria.id; 
+            //  console.log("desc: "+articulo.categoria.descripcion);
             document.getElementById("precio").value = articulo.precio;
         })
         .catch(error => console.error("Error al obtener artículo:", error)); // Manejo de errores
 }
 
 // === Eliminar un artículo ===
-function eliminarArticulo(id) {
+function eliminarArticulo(idForm) {
     // Confirmación antes de eliminar
     if (confirm("¿Deseás eliminar este artículo?")) {
         // Llamada DELETE al backend
-        fetch(`${API_URL}/${id}`, {
+        fetch(`${API_URL}/${idForm}`, {
             method: "DELETE"
         })
         .then(response => {
