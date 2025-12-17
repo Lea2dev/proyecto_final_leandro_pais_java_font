@@ -14,6 +14,10 @@ document.getElementById("cancelar").addEventListener("click", () => {
     document.getElementById("form-articulo").reset();
     // Borrar el ID oculto del formulario
     document.getElementById("idArticulo").value = "";
+    // ya sea que guardo o actualizo, seteo todo para que quede Guardar listo
+    document.getElementById("accion").textContent = "Guardar",
+    document.getElementById("accion").classList.remove('btn-success'),
+    document.getElementById("accion").classList.add('btn-primary')
 });
 
 // === Listar todos los artículos ===
@@ -94,6 +98,11 @@ function guardarArticulo(event) {
         document.getElementById("idArticulo").value = "";
         listarArticulos();
     })
+    .then( // ya sea que guardo o actualizo, seteo todo para que quede Guardar listo
+        document.getElementById("accion").textContent = "Guardar",
+        document.getElementById("accion").classList.remove('btn-success'),
+        document.getElementById("accion").classList.add('btn-primary')
+    )    
     .catch(error => console.error("Error al guardar artículo:", error)); // Manejo de errores
 }
 
@@ -112,6 +121,11 @@ function editarArticulo(idForm) {
             //  console.log("desc: "+articulo.categoria.descripcion);
             document.getElementById("precio").value = articulo.precio;
         })
+        .then( // modifico texto de botón para que no sea guardar, sino Actualizar
+            document.getElementById("accion").textContent = "Actualizar",
+            document.getElementById("accion").classList.remove('btn-primary'),
+            document.getElementById("accion").classList.add('btn-success')
+        )
         .catch(error => console.error("Error al obtener artículo:", error)); // Manejo de errores
 }
 
