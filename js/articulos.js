@@ -60,7 +60,17 @@ function guardarArticulo(event) {
     }
 
     // Creamos un objeto artículo con los datos del formulario sin JSON.stringgify para construir con id de categoria relacionada
-    const articulo = '{"nombre": "'+nombreForm+'",  "precio": '+precioForm+',  "categoria":  { "id": '+categoriaForm+'}  }';
+    //const articulo = '{"nombre": "'+nombreForm+'",  "precio": '+precioForm+',  "categoria":  { "id": '+categoriaForm+'}  }';
+
+    const guardarArticulo = {
+        nombre: nombreForm,
+        precio: precioForm,
+        categoria: { 
+            id: categoriaForm
+        }
+    };
+
+    const articulo = JSON.stringify(guardarArticulo);
 
     // Determinamos si es una edición (PUT) o creación (POST)
     const url = idForm ? `${API_URL}/${idForm}` : API_URL;
